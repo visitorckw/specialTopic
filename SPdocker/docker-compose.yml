@@ -1,0 +1,54 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:5.7
+    ports:
+      - 3306:3306
+    #volumes:
+     # - ./mysql/data:/var/lib/mysql
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: 'no'
+      MYSQL_USER: visitor
+      MYSQL_PASSWORD: visitor
+      MYSQL_DATABASE: myDB
+      MYSQL_ROOT_PASSWORD: root
+
+  #DBadmin:
+   # image: adminer
+    #ports:
+     # - 8080:8080
+
+  backend:
+    build: ./server
+    #volumes:
+     # - ./server:/usr/src/app
+    expose:
+      - "3000"
+    ports:
+      - 3000:3000
+    restart: always
+    depends_on:
+      - mysql
+
+  ai:
+    build: ./ai
+    expose:
+      - "5000"
+    ports:
+      - 5000:5000
+    restart: always
+    depends_on:
+      - backend
+      - mysql
+  proxy:
+    image: nginx:stable-alpine
+    restart: always
+    ports:
+      - 8080:80
+    volumes:
+      - ./proxy/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+      - ai
+
