@@ -3,17 +3,15 @@
 <!-- PROJECT LOGO -->
 <br />
 <div align="center">
-    <img src="https://i.imgur.com/FTC7MSm.png" alt="Logo" width="80" height="80">
-<!--     ![](https://i.imgur.com/FTC7MSm.png) -->
 
-
-  <h3 align="center">Special Topic</h3>
+  <h1 align="center">Special Topic</h1>
 
   <p align="center">
     <br />
 
 
-
+</p>
+</div>
 <!-- TABLE OF CONTENTS -->
 <details>
   <summary>Table of Contents</summary>
