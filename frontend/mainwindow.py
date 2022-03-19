@@ -17,6 +17,9 @@ class Ui_MainWindow(object):
         MainWindow.resize(800, 600)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
+        self.label = QtWidgets.QLabel(self.centralwidget)
+        self.label.setGeometry(QtCore.QRect(220, 40, 361, 91))
+        self.label.setObjectName("label")
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setGeometry(QtCore.QRect(340, 160, 93, 28))
         self.pushButton.setObjectName("pushButton")
@@ -44,6 +47,7 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        self.label.setText(_translate("MainWindow", "123"))
         self.pushButton.setText(_translate("MainWindow", "一般模式"))
         self.pushButton_2.setText(_translate("MainWindow", "進階模式"))
         self.pushButton_3.setText(_translate("MainWindow", "使用者資訊"))
