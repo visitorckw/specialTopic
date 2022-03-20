@@ -70,7 +70,7 @@ typeorm.createConnection({
 				res.send({pid: -1, status: 2, msg: "incorrect password"});
 			}
 			else{
-				res.send({pid: usr.pid, status: 0, msg: "login success"});
+				res.send({pid: usr.pid, status: 0,nickname: usr.nickname, msg: "login success"});
 			}
 		});
 	});
@@ -85,6 +85,7 @@ typeorm.createConnection({
 				repo.save({
 					account: params.account,
 					passWord: params.passWord,
+					nickname: params.nickname,
 					games: 0,
 					scores: 0
 				}).then(function(obj){

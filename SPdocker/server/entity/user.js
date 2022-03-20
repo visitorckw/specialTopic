@@ -15,6 +15,9 @@ module.exports = new EntitySchema({
         passWord: {
             type: "varchar"
         },
+        nickname: {
+            type: "varchar"
+        },
         games: {
         	type: "int"
         },
