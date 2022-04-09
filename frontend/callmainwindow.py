@@ -1,21 +1,22 @@
-# -*- coding:utf-8 -*-
+ #-*- coding:utf-8 -*-
 import sys
 from PyQt5.QtWidgets import QMainWindow, QApplication
 from mainwindow import *
 from create_accountwindow import *
 from login_window import *
+from count import *
 from PyQt5.QtWidgets import  QMessageBox
 import requests
 import json
 import cv2
 import mediapipe as mp
-
+import time
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 ip = "127.0.0.1:8080"
-nickname = '-1'
+Time = 2      #game time
 
 class loginWindow(QtWidgets.QMainWindow):
 	def __init__(self):
@@ -41,7 +42,7 @@ class loginWindow(QtWidgets.QMainWindow):
 			global nickname
 			nickname = dic['nickname']
 			window.hide()
-			mainwindow.set_text()
+			mainwindow.set_text(nickname)
 			mainwindow.show()
 			
 		elif (dic['status']==1):
@@ -54,13 +55,7 @@ class loginWindow(QtWidgets.QMainWindow):
 			msg.setWindowTitle("錯誤提示")
 			msg.setText("密碼錯誤")
 			msg.exec_()
-		'''
-		print("account : "+account )
-		print("password : "+password)
-		print("nickname : "+ dic['nickname'])
-		print(type(dic['nickname']))
-		print(nickname)
-		'''
+
 	def creat_account(self):
 		window.hide()
 		accountWindow.show()
@@ -117,8 +112,6 @@ class create_accountWindow(QtWidgets.QMainWindow):
 				msg.setWindowTitle("錯誤提示")
 				msg.setText("帳號已存在")
 				msg.exec_()
-	
-					
 			
 	def delete(self):
 		self.clear()
@@ -137,6 +130,8 @@ class MainWindow(QtWidgets.QMainWindow):
 	def game(self):
 		#self.close()
 		# For static images:
+		countwindow.show()
+
 		IMAGE_FILES = []
 		BG_COLOR = (192, 192, 192) # gray
 		with mp_pose.Pose(
@@ -182,6 +177,10 @@ class MainWindow(QtWidgets.QMainWindow):
 		with mp_pose.Pose(
 			min_detection_confidence=0.5,
 			min_tracking_confidence=0.5) as pose:
+
+			time_start = time.time()
+			score = 0
+			
 			while cap.isOpened():
 				success, image = cap.read()
 				if not success:
@@ -196,13 +195,12 @@ class MainWindow(QtWidgets.QMainWindow):
 				results = pose.process(image)
 				# print(results)
 				# print(results.pose_landmarks)
-				# print('-------------------')
+				# print('-------------------')S
 				# print(results.pose_landmarks)
 				#if results:
 				#for id, coor in enumerate(results.pose_landmarks):
 				#	print(id, coor.visibility)
 				print('--------------')
-
 				# Draw the pose annotation on the image.
 				image.flags.writeable = True
 				image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -212,8 +210,15 @@ class MainWindow(QtWidgets.QMainWindow):
 				mp_pose.POSE_CONNECTIONS,
 				landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 				# Flip the image horizontally for a selfie-view display.
+
+				time_end = time.time() 
 				cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
-				if cv2.waitKey(5) & 0xFF == 27:
+
+				countwindow.labelupdate(Time-int(time_end - time_start),score)
+                
+
+				if  cv2.waitKey(5) & 0xFF == 27 or int(time_end - time_start) == Time: #time setting
+					cv2.destroyWindow('MediaPipe Pose')
 					break
 		cap.release()
 		
@@ -223,13 +228,29 @@ class MainWindow(QtWidgets.QMainWindow):
 		    
 		    self.close()
 		    window.show()
-	def set_text(self):		    
-	    self.ui.label.setText("Hi,"+nickname)
+	def set_text(self,nickname):		    
+	    self.ui.label.setText("Hi,"+str(nickname))
 
+class countWindow(QtWidgets.QMainWindow):
+	def __init__(self, parent=None):
+		super(countWindow, self).__init__()
+		self.ui = Ui_countWindow()
+		self.ui.setupUi(self)
+		self.ui.pushButton.clicked.connect(self.confirm)
+
+	def labelupdate(self,Time,Score):
+		self.ui.label_3.setText(str(Time))
+		self.ui.label_4.setText(str(Score))	
+
+	def confirm(self):
+		self.close()
+		 
 if __name__ == "__main__":
 	app = QApplication(sys.argv)
 	window = loginWindow()
 	mainwindow = MainWindow()
 	accountWindow = create_accountWindow()
+	countwindow = countWindow()
 	window.show()
 	sys.exit(app.exec_())
+	
