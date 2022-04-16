@@ -11,13 +11,15 @@ import json
 import cv2
 import mediapipe as mp
 import time
+import random
+import math
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 ip = "127.0.0.1:8080"
-Time = 2      #game time
-
+Time = 15     #game time
+Time_interval = 4
 class loginWindow(QtWidgets.QMainWindow):
 	def __init__(self):
 		super(loginWindow, self).__init__()
@@ -181,6 +183,9 @@ class MainWindow(QtWidgets.QMainWindow):
 			time_start = time.time()
 			score = 0
 			
+			flag = 0
+			flag2 = 0
+			
 			while cap.isOpened():
 				success, image = cap.read()
 				if not success:
@@ -198,8 +203,9 @@ class MainWindow(QtWidgets.QMainWindow):
 				# print('-------------------')S
 				# print(results.pose_landmarks)
 				#if results:
-				#for id, coor in enumerate(results.pose_landmarks):
-				#	print(id, coor.visibility)
+				
+				#for i in results.pose_landmarks.landmark:
+				#	print(i)
 				print('--------------')
 				# Draw the pose annotation on the image.
 				image.flags.writeable = True
@@ -210,13 +216,48 @@ class MainWindow(QtWidgets.QMainWindow):
 				mp_pose.POSE_CONNECTIONS,
 				landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 				# Flip the image horizontally for a selfie-view display.
-
-				time_end = time.time() 
-				cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))
-
+			
+				time_end = time.time()
+				
+				
+				# Center coordinates 
+				# 630,480
+				if  (int(time_end - time_start) % Time_interval == 0  and flag == 0) or flag2 == 1:
+					X = random.randint(0,630)
+					Y = random.randint(0,480)
+					center_coordinates = (X,Y) 
+					flag = 1
+					flag2 = 0
+				elif int(time_end - time_start) % Time_interval == 1:	
+				    flag = 0
+				        
+				# Radius of circle 
+				radius = 5
+				   
+				# Blue color in BGR 
+				color = (255, 0, 0) 
+				   
+				# Line thickness of 2 px 
+				thickness = 10
+				   
+				# Draw a circle with blue line borders of thickness of 2 px 
+				image = cv2.circle(image, center_coordinates, radius, color, thickness) 
+				
+				# 15 17 19 21 lefthand
+				# 16 18 20 22
+				if not results.pose_landmarks:
+					continue
+				for id, coor in enumerate(results.pose_landmarks.landmark):
+					if id>=15 and id <=22  and coor.visibility > 0.7:
+						if abs(X-coor.x*630)<20 and abs(Y-coor.y*480)<20 :
+							print(id, coor.x, coor.y, coor.visibility)
+							score = score + 1
+							flag2 = 1
+				
+				
+				cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))			
 				countwindow.labelupdate(Time-int(time_end - time_start),score)
                 
-
 				if  cv2.waitKey(5) & 0xFF == 27 or int(time_end - time_start) == Time: #time setting
 					cv2.destroyWindow('MediaPipe Pose')
 					break
