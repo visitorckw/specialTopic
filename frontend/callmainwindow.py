@@ -18,7 +18,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 ip = "127.0.0.1:8080"
-Time = 15     #game time
+Time = 30     #game time
 Time_interval = 4
 class loginWindow(QtWidgets.QMainWindow):
 	def __init__(self):
@@ -183,9 +183,10 @@ class MainWindow(QtWidgets.QMainWindow):
 			time_start = time.time()
 			score = 0
 			
-			flag = 0
-			flag2 = 0
-			
+			Changed = 0
+			Correct = 0
+			X = 0
+			Y = 0
 			while cap.isOpened():
 				success, image = cap.read()
 				if not success:
@@ -222,14 +223,14 @@ class MainWindow(QtWidgets.QMainWindow):
 				
 				# Center coordinates 
 				# 630,480
-				if  (int(time_end - time_start) % Time_interval == 0  and flag == 0) or flag2 == 1:
+				if  (int(time_end - time_start) % Time_interval == 0  and Changed == 0) or Correct == 1:
 					X = random.randint(0,630)
 					Y = random.randint(0,480)
 					center_coordinates = (X,Y) 
-					flag = 1
-					flag2 = 0
+					Changed = 1
+					Correct = 0
 				elif int(time_end - time_start) % Time_interval == 1:	
-				    flag = 0
+				    Changed = 0
 				        
 				# Radius of circle 
 				radius = 5
@@ -248,11 +249,11 @@ class MainWindow(QtWidgets.QMainWindow):
 				if not results.pose_landmarks:
 					continue
 				for id, coor in enumerate(results.pose_landmarks.landmark):
-					if id>=15 and id <=22  and coor.visibility > 0.7:
-						if abs(X-coor.x*630)<20 and abs(Y-coor.y*480)<20 :
-							print(id, coor.x, coor.y, coor.visibility)
+					if ( id ==19 or id ==20 ) and coor.visibility > 0.7:
+						if abs(X-coor.x*1300) < 40 and abs(Y-coor.y*700)< 40 :
+							print(id, coor.x, coor.y, coor.visibility,X,Y)
 							score = score + 1
-							flag2 = 1
+							Correct = 1
 				
 				
 				cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))			
