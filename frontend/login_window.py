@@ -35,7 +35,7 @@ class Ui_loginWindow(object):
         self.label_2.setObjectName("label_2")
 
         self.label_3 = QtWidgets.QLabel(self.centralwidget)
-        self.label_3.setGeometry(QtCore.QRect(220, 40, 361, 91))
+        self.label_3.setGeometry(QtCore.QRect(370, 40, 361, 91))
         self.label_3.setObjectName("label_3")
 
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
@@ -70,4 +70,4 @@ class Ui_loginWindow(object):
         self.pushButton.setText(_translate("loginWindow", "建立帳戶"))
         self.pushButton_2.setText(_translate("loginWindow", "登入"))
         self.pushButton_3.setText(_translate("loginWindow", "取消"))
-        self.label_3.setText(_translate("loginWindow", "123"))
+        self.label_3.setText(_translate("loginWindow", "Welcome !!!"))

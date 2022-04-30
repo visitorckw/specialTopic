@@ -6,6 +6,7 @@ from create_accountwindow import *
 from login_window import *
 from count import *
 from PyQt5.QtWidgets import  QMessageBox
+from PyQt5.QtCore import Qt
 import requests
 import json
 import cv2
@@ -13,12 +14,15 @@ import mediapipe as mp
 import time
 import random
 import math
+from playsound import playsound
+#import keyboard
+
 mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 ip = "127.0.0.1:8080"
-Time = 30     #game time
+Time = 10     #game time
 Time_interval = 4
 class loginWindow(QtWidgets.QMainWindow):
 	def __init__(self):
@@ -29,11 +33,16 @@ class loginWindow(QtWidgets.QMainWindow):
 		self.ui.pushButton.clicked.connect(self.creat_account)
 		self.ui.pushButton_2.clicked.connect(self.login)
 		self.ui.pushButton_3.clicked.connect(self.delete)
+	
+	
+
+	def keyPressEvent(self, event):
+		if event.key() == Qt.Key_Return:
+			self.login()
 
 	def login(self):
 		account = self.ui.lineEdit.text()
 		password = self.ui.lineEdit_2.text()
-		
 		res = requests.get('http://' + ip + '/api/login?account=' + account+'&passWord='+ password )
         
 		dic = json.loads(res.text)
@@ -65,6 +74,7 @@ class loginWindow(QtWidgets.QMainWindow):
 	def delete(self):          
 		self.ui.lineEdit.clear()
 		self.ui.lineEdit_2.clear()
+
 
 
 
@@ -222,10 +232,12 @@ class MainWindow(QtWidgets.QMainWindow):
 				
 				
 				# Center coordinates 
-				# 630,480
+				Width,Height,c=image.shape
+				#print(Width, Height)
+				#print(a,b,c)
 				if  (int(time_end - time_start) % Time_interval == 0  and Changed == 0) or Correct == 1:
-					X = random.randint(0,630)
-					Y = random.randint(0,480)
+					X = random.randint(0,Height)
+					Y = random.randint(0,Width)
 					center_coordinates = (X,Y) 
 					Changed = 1
 					Correct = 0
@@ -249,11 +261,14 @@ class MainWindow(QtWidgets.QMainWindow):
 				if not results.pose_landmarks:
 					continue
 				for id, coor in enumerate(results.pose_landmarks.landmark):
-					if ( id ==19 or id ==20 ) and coor.visibility > 0.7:
-						if abs(X-coor.x*1300) < 40 and abs(Y-coor.y*700)< 40 :
+					if ( id ==19 or id ==20 ) and coor.visibility > 0.5:
+						if abs(X-coor.x*Height) < 40 and abs(Y-coor.y*Width)< 40 :
 							print(id, coor.x, coor.y, coor.visibility,X,Y)
 							score = score + 1
 							Correct = 1
+							playsound('./correct.mp3', block=False)
+							for i in range (0, 5000) :
+								image = cv2.circle(image, center_coordinates, radius, (0,255,0), thickness) 
 				
 				
 				cv2.imshow('MediaPipe Pose', cv2.flip(image, 1))			
