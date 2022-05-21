@@ -127,13 +127,13 @@ typeorm.createConnection({
 		repo.find({pid: params.pid}).then(function(gameData){
 			console.log(gameData);
 			let ans = [];
-			for(let data in gameData){
-				console.log(data);
+			for(let i = 0; i < gameData.length; i++){
+				console.log(gameData[i]);
 				ans.push({
-					gameId: data.gameId,
-					date: data.date,
-					mode: data.mode,
-					score: data.score,
+					gameId: gameData[i].gameId,
+					date: gameData[i].date,
+					mode: gameData[i].mode,
+					score: gameData[i].score,
 				});
 			}
 			res.send(ans);
