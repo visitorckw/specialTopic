@@ -15,7 +15,10 @@ module.exports = new EntitySchema({
         date: {
             type: "varchar"
         },
-        scores: {
+        mode: {
+            type: "varchar"
+        },
+        score: {
         	type: "int"
         }
     }

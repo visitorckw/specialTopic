@@ -94,6 +94,42 @@ typeorm.createConnection({
 			}
 		});
 	});
+	app.get(prefix + '/saveGame', function(req, res){
+		let params = req.query;
+		let repo = connection.getRepository('user');
+		repo.findOne({pid: params.pid}).then(function(usr){
+			console.log(usr);
+			let newGames = usr.games + 1;
+			let newScores = usr.scores + params.score;
+			let GameRepo = connection.getRepository('game');
+			repo.save({
+				pid: usr.pid,
+				account: usr.account,
+				passWord: usr.passWord,
+				nickname: usr.nickname,
+				games: newGames,
+				scores: newScores,
+			});
+			GameRepo.save({
+				pid: usr.pid,
+				date: new Date().toString(),
+				mode: params.mode,
+				score: params.score,
+			});
+			res.send({status: 0, msg: 'success'});
+		});
+		// res.send({status: 0, msg: 'success'});
+	});
+	app.get(prefix + '/games', function(req, res){
+		console.log('GET games');
+		let params = req.query;
+		let repo = connection.getRepository('game');
+		let ans = repo.createQueryBuilder("game")
+		.where('game.pid=' + params.pid)
+		// .orderBy('game.date', 'desc')
+  		.getMany();
+		res.send(ans);
+	});
 	app.listen(3000);
 }).catch(function(err){
 	console.log(err);
