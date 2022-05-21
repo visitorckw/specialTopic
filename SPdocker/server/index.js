@@ -99,8 +99,8 @@ typeorm.createConnection({
 		let repo = connection.getRepository('user');
 		repo.findOne({pid: params.pid}).then(function(usr){
 			console.log(usr);
-			let newGames = usr.games + 1;
-			let newScores = usr.scores + params.score;
+			let newGames = parseInt(usr.games) + 1;
+			let newScores = parseInt(usr.scores) + parseInt(params.score);
 			let GameRepo = connection.getRepository('game');
 			repo.save({
 				pid: usr.pid,
@@ -124,11 +124,20 @@ typeorm.createConnection({
 		console.log('GET games');
 		let params = req.query;
 		let repo = connection.getRepository('game');
-		let ans = repo.createQueryBuilder("game")
-		.where('game.pid=' + params.pid)
-		// .orderBy('game.date', 'desc')
-  		.getMany();
-		res.send(ans);
+		repo.find({pid: params.pid}).then(function(gameData){
+			console.log(gameData);
+			let ans = [];
+			for(let data in gameData){
+				console.log(data);
+				ans.push({
+					gameId: data.gameId,
+					date: data.date,
+					mode: data.mode,
+					score: data.score,
+				});
+			}
+			res.send(ans);
+		});
 	});
 	app.listen(3000);
 }).catch(function(err){
