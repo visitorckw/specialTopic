@@ -139,6 +139,30 @@ typeorm.createConnection({
 			res.send(ans);
 		});
 	});
+	app.get(prefix + '/scoreboard', function(req,res){
+		console.log('GET scoreboard');
+		let params = req.query;
+		let repo = connection.getRepository('game');
+		repo.find({
+			mode: params.mode,
+			order:{
+				score: "DESC"
+			},
+		}).then(function(gameData){
+			console.log(gameData);
+			let ans = [];
+			for(let i = 0; i < gameData.length; i++){
+				console.log(gameData[i]);
+				ans.push({
+					pid: gameData[i].pid,
+					gameId: gameData[i].gameId,
+					date: gameData[i].date,
+					score: gameData[i].score,
+				});
+			}
+			res.send(ans);
+		});
+	});
 	app.listen(3000);
 }).catch(function(err){
 	console.log(err);
