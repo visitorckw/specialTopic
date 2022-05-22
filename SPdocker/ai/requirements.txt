@@ -3,3 +3,6 @@ gunicorn==20.1.0
 itsdangerous==2.0.1
 requests
 jinja2
+numpy
+opencv-python-headless
+deepface
