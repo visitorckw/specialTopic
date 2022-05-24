@@ -9,7 +9,7 @@ module.exports = new EntitySchema({
             type: "int",
             generated: true
         },
-        pid: {
+        uid: {
             type: "int"
         },
         date: {

@@ -64,13 +64,13 @@ typeorm.createConnection({
 		let repo = connection.getRepository('user');
 		repo.findOne({account: params.account}).then(function(usr){
 			if(!usr){
-				res.send({pid: -1, status: 1, msg: "account not found"});
+				res.send({uid: -1, status: 1, msg: "account not found"});
 			}
 			else if(usr.passWord != params.passWord){
-				res.send({pid: -1, status: 2, msg: "incorrect password"});
+				res.send({uid: -1, status: 2, msg: "incorrect password"});
 			}
 			else{
-				res.send({pid: usr.pid, status: 0,nickname: usr.nickname, msg: "login success"});
+				res.send({uid: usr.uid, status: 0,nickname: usr.nickname, msg: "login success"});
 			}
 		});
 	});
@@ -97,13 +97,13 @@ typeorm.createConnection({
 	app.get(prefix + '/saveGame', function(req, res){
 		let params = req.query;
 		let repo = connection.getRepository('user');
-		repo.findOne({pid: params.pid}).then(function(usr){
+		repo.findOne({uid: params.uid}).then(function(usr){
 			console.log(usr);
 			let newGames = parseInt(usr.games) + 1;
 			let newScores = parseInt(usr.scores) + parseInt(params.score);
 			let GameRepo = connection.getRepository('game');
 			repo.save({
-				pid: usr.pid,
+				uid: usr.uid,
 				account: usr.account,
 				passWord: usr.passWord,
 				nickname: usr.nickname,
@@ -111,7 +111,7 @@ typeorm.createConnection({
 				scores: newScores,
 			});
 			GameRepo.save({
-				pid: usr.pid,
+				uid: usr.uid,
 				date: new Date().toString(),
 				mode: params.mode,
 				score: params.score,
@@ -124,7 +124,7 @@ typeorm.createConnection({
 		console.log('GET games');
 		let params = req.query;
 		let repo = connection.getRepository('game');
-		repo.find({pid: params.pid}).then(function(gameData){
+		repo.find({uid: params.uid}).then(function(gameData){
 			console.log(gameData);
 			let ans = [];
 			for(let i = 0; i < gameData.length; i++){
@@ -154,7 +154,7 @@ typeorm.createConnection({
 			for(let i = 0; i < gameData.length; i++){
 				console.log(gameData[i]);
 				ans.push({
-					pid: gameData[i].pid,
+					uid: gameData[i].uid,
 					gameId: gameData[i].gameId,
 					date: gameData[i].date,
 					score: gameData[i].score,
