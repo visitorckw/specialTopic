@@ -124,7 +124,7 @@ typeorm.createConnection({
 		console.log('GET games');
 		let params = req.query;
 		let repo = connection.getRepository('game');
-		repo.find({uid: params.uid}).then(function(gameData){
+		repo.find({uid: params.uid, take: 5,}).then(function(gameData){
 			console.log(gameData);
 			let ans = [];
 			for(let i = 0; i < gameData.length; i++){
@@ -148,6 +148,7 @@ typeorm.createConnection({
 			order:{
 				score: "DESC"
 			},
+			take: 5,
 		}).then(function(gameData){
 			console.log(gameData);
 			let ans = [];
