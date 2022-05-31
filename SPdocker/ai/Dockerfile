@@ -1,5 +1,8 @@
 FROM python:3.9
 
+#RUN cd ~ && mkdir .deepface && cd .deepface && mkdir weights
+#COPY ./weights/* ~/.deepface/weights/
+
 WORKDIR /app
 
 COPY requirements.txt ./
@@ -9,4 +12,4 @@ RUN pip install -r requirements.txt
 
 COPY . /app
 
-CMD [ "python", "app.py" ]
+CMD [ "python", "server.py" ]
