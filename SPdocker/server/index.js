@@ -139,23 +139,39 @@ typeorm.createConnection({
 			res.send(ans);
 		});
 	});
+	async function findNicknameById(uid){
+		let repo = connection.getRepository('user');
+		let usr = await repo.findOne({uid: uid});
+		return usr.nickname;
+	}
 	app.get(prefix + '/scoreboard', function(req,res){
 		console.log('GET scoreboard');
 		let params = req.query;
 		let repo = connection.getRepository('game');
+		let repo2 = connection.getRepository('user');
 		repo.find({
 			mode: params.mode,
 			order:{
 				score: "DESC"
 			},
 			take: 5,
-		}).then(function(gameData){
+		}).then(async function(gameData){
 			console.log(gameData);
 			let ans = [];
 			for(let i = 0; i < gameData.length; i++){
 				console.log(gameData[i]);
+				/*
 				ans.push({
 					uid: gameData[i].uid,
+					gameId: gameData[i].gameId,
+					date: gameData[i].date,
+					score: gameData[i].score,
+				});
+				*/
+				let nickname = await findNicknameById(gameData[i].uid);
+				console.log('nickname = ' + nickname);
+				ans.push({
+					nickname: nickname,
 					gameId: gameData[i].gameId,
 					date: gameData[i].date,
 					score: gameData[i].score,
