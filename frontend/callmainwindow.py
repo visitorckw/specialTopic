@@ -23,7 +23,7 @@ mp_drawing = mp.solutions.drawing_utils
 mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
-ip = "127.0.0.1:8080"
+ip = "140.116.154.65:56543"
 Time = 10     #game time
 Time_interval = 2
 
@@ -290,7 +290,7 @@ class MainWindow(QtWidgets.QMainWindow):
 					cv2.destroyWindow('MediaPipe Pose')
 					break
 		cap.release()
-		requests.get('http://' + ip + '/api/saveGame?pid=' + str(UID) +'&score='+ str(score) + '&mode='+ 'normal')
+		requests.get('http://' + ip + '/api/saveGame?uid=' + str(UID) +'&score='+ str(score) + '&mode='+ 'normal')
 		
 		
     
@@ -479,12 +479,14 @@ class MainWindow(QtWidgets.QMainWindow):
 	def rank(self):
 		res=requests.get('http://' + ip + '/api/scoreboard?mode=' + 'normal' )
 		dic = json.loads(res.text)
-		
-		str = ['null' for i in range(5)]
+		print(dic)
+		record = ['null' for i in range(5)]
 		for i in range(len(dic)) :
-			str[i] = dic[i]['account'] + dic[i]['score'] + dic[i]['date']
-
-		rankwindow.set_text(str[0],str[1],str[2],str[3],str[4])
+			#record[i] = str(dic[i]['uid']) + str(dic[i]['gameId']) + dic[i]['date'] + str(dic[i]['score'])
+			tmp = str(dic[i]['date']).spilt('GMT')	
+			record[i] = str(dic[i]['score']) + '   ' + tmp[0]
+		rankwindow.set_text(record[0],record[1],record[2],record[3],record[4])
+		
 		rankwindow.show()
 
 	def logout(self):
