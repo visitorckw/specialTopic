@@ -25,7 +25,7 @@ class Ui_countWindow(object):
         self.label.setFont(font)
         self.label.setObjectName("label")
         self.label_2 = QtWidgets.QLabel(self.centralwidget)
-        self.label_2.setGeometry(QtCore.QRect(220, 230, 191, 51))
+        self.label_2.setGeometry(QtCore.QRect(220, 240, 191, 51))
         font = QtGui.QFont()
         font.setFamily("3ds")
         font.setPointSize(22)
@@ -49,6 +49,25 @@ class Ui_countWindow(object):
         self.label_4.setText("")
         self.label_4.setObjectName("label_4")
        
+        self.label_5 = QtWidgets.QLabel(self.centralwidget)
+        self.label_5.setGeometry(QtCore.QRect(220, 290, 150, 41))
+        font = QtGui.QFont()
+        font.setFamily("3ds")
+        font.setPointSize(22)
+        self.label_5.setFont(font)
+        self.label_5.setText("")
+        self.label_5.setObjectName("label_5")
+        
+        
+        self.label_6 = QtWidgets.QLabel(self.centralwidget)
+        self.label_6.setGeometry(QtCore.QRect(430, 290, 111, 41))
+        font = QtGui.QFont()
+        font.setFamily("3ds")
+        font.setPointSize(22)
+        self.label_6.setFont(font)
+        self.label_6.setText("")
+        self.label_6.setObjectName("label_6")
+        
         self.pushButton = QtWidgets.QPushButton(self.centralwidget)
         self.pushButton.setGeometry(QtCore.QRect(325, 350, 93, 28))
         self.pushButton.setObjectName("pushButton")
@@ -71,4 +90,9 @@ class Ui_countWindow(object):
         
         self.label.setText(_translate("countWindow", " time："))
         self.label_2.setText(_translate("countWindow", "score ："))
+        
+        self.label_5.setText(_translate("countWindow", "年齡預測 ："))
+        
+        self.label_6.setText(_translate("countWindow", "預測中..."))
+        
         self.pushButton.setText(_translate("countWindow", "確認"))

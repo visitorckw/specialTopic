@@ -2,6 +2,7 @@
 from ast import Global
 import sys
 from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtCore import QThread
 from mainwindow import *
 from create_accountwindow import *
 from login_window import *
@@ -24,7 +25,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 ip = "140.116.154.65:56543"
-Time = 10     #game time
+Time = 12    #game time
 Time_interval = 2
 
 class loginWindow(QtWidgets.QMainWindow):
@@ -200,10 +201,10 @@ class MainWindow(QtWidgets.QMainWindow):
 		with mp_pose.Pose(
 			min_detection_confidence=0.5,
 			min_tracking_confidence=0.5) as pose:
-
+			
 			time_start = time.time()
 			
-			
+			second_delay = 0
 			Changed = 0
 			Correct = 0
 			X = 0
@@ -238,7 +239,11 @@ class MainWindow(QtWidgets.QMainWindow):
 				mp_pose.POSE_CONNECTIONS,
 				landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 				# Flip the image horizontally for a selfie-view display.
-			
+				
+				if second_delay == 0:
+					time.sleep(2)
+					second_delay = 1
+				
 				time_end = time.time()
 				
 				
@@ -483,8 +488,9 @@ class MainWindow(QtWidgets.QMainWindow):
 		record = ['null' for i in range(5)]
 		for i in range(len(dic)) :
 			#record[i] = str(dic[i]['uid']) + str(dic[i]['gameId']) + dic[i]['date'] + str(dic[i]['score'])
-			tmp = str(dic[i]['date']).spilt('GMT')	
-			record[i] = str(dic[i]['score']) + '   ' + tmp[0]
+			tmp = str(dic[i]['date'])
+			tmp = tmp.split('GMT')	
+			record[i] = dic[i]['nickname'] + '   ' + str(dic[i]['score']) + '      ' + tmp[0] 
 		rankwindow.set_text(record[0],record[1],record[2],record[3],record[4])
 		
 		rankwindow.show()
@@ -526,8 +532,14 @@ class rankWindow(QtWidgets.QMainWindow):
 			self.ui.label_9.setText(str4)
 			self.ui.label_10.setText(str5)
 
+class WorkerThread(QThread):
+	def __init__(self):
+		super().__init__()
+	def run(self):
+	
 
-		 
+
+
 if __name__ == "__main__":
 	app = QApplication(sys.argv)
 	window = loginWindow()
