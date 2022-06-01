@@ -13,7 +13,8 @@ typeorm.createConnection({
     synchronize: true,
     entities: [
         require("./entity/user.js"),
-        require("./entity/game.js")
+        require("./entity/game.js"),
+        require("./entity/predict.js")
     ]
 }).then(function(connection){
 	console.log('server connect database success');
@@ -192,6 +193,24 @@ typeorm.createConnection({
 			}
 			res.send(ans);
 		});
+	});
+	app.get(prefix + '/savePredict', async function(req, res){
+		let params = req.query;
+		let repo = connection.getRepository('predict');
+		await repo.save({
+			gameId: params.gameId,
+			result: params.result
+		});
+		res.send({status: 0, msg: 'success'});
+	});
+	app.get(prefix + '/getPredict', async function(req, res){
+		let params = req.query;
+		let repo = connection.getRepository('predict');
+		let ans = await repo.findOne({
+			gameId: params.gameId
+		});
+		let ansObj = JSON.parse(ans.result);
+		res.send(ansObj);
 	});
 	app.listen(3000);
 }).catch(function(err){
