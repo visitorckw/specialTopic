@@ -82,7 +82,7 @@ typeorm.createConnection({
 				res.send({status: 1, msg: "account already exist"});
 			}
 			else{
-				repo.save({
+				repo.save({ 
 					account: params.account,
 					passWord: params.passWord,
 					nickname: params.nickname,
