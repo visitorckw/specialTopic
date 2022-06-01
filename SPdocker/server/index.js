@@ -94,6 +94,18 @@ typeorm.createConnection({
 			}
 		});
 	});
+	app.get(prefix + '/startGame', async function(req, res){
+		let params = req.query;
+		let repo = connection.getRepository('game');
+		let game = await repo.save({
+			uid: params.uid,
+			date: new Date().toString(),
+			mode: params.mode,
+			score: 0,
+		});
+		console.log(game);
+		res.send({gameId: game.gameId, msg: "success"});
+	});
 	app.get(prefix + '/saveGame', function(req, res){
 		let params = req.query;
 		let repo = connection.getRepository('user');
@@ -112,6 +124,7 @@ typeorm.createConnection({
 			});
 			GameRepo.save({
 				uid: usr.uid,
+				gameId: params.gameId,
 				date: new Date().toString(),
 				mode: params.mode,
 				score: params.score,
