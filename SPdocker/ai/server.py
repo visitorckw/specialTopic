@@ -2,6 +2,7 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 import requests
+import json
 from concurrent.futures import ThreadPoolExecutor
 import threading
 import base64
@@ -10,15 +11,18 @@ from deepface import DeepFace
 number = 1
 executor = ThreadPoolExecutor(2)
 mutex = threading.Lock()
-def runAI(fileName):
+def runAI(fileName, gameId):
+	url = 'http://backend:3000/api/savePredict?'
 	try:
 		obj = DeepFace.analyze(img_path = fileName, actions = ['age', 'gender'])
 		print('predict successfully')
 		print(obj)
+		requests.get(url + 'gameId=' + str(gameId) + '&result' + json.dump(obj))
+		return 'success'
 	except:
 		print('Error while detecting face')
+		requests.get(url + 'gameId=' + str(gameId) + '&result' + json.dump({'msg': 'cannot detect face'}))
 	return 'cannot detect face'
-# executor.submit(long_task, 'hello', 123)
 
 server = Flask(__name__)
 prefix = '/ai'
@@ -41,12 +45,13 @@ def ver():
 def predict():
 	global mutex, number
 	pic = request.values['picture']
+	gameId = request.values['gameId']
 	mutex.acquire()
 	filename = 'pic' + str(number) + '.jpg'
 	with open(filename, 'wb') as file:
 		jiema = base64.b64decode(pic)
 		file.write(jiema)
-	executor.submit(runAI, filename)
+	executor.submit(runAI, filename, gameId)
 	number += 1
 	mutex.release()
 	return 'submit successfully'
