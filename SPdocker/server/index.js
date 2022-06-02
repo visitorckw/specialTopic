@@ -1,5 +1,6 @@
 var express = require('express');
 var typeorm = require('typeorm');
+var bodyParser = require('body-parser');
 const prefix = '/api';
 
 
@@ -20,6 +21,7 @@ typeorm.createConnection({
 	console.log('server connect database success');
 	console.log('SERVER START LISTEN ON PORT 3000');
 	const app = express();
+	app.use(bodyParser.urlencoded({ extended: false }));
 	app.get('/', function(req, res){
 		res.send('hello world from nodejs');
 	})
@@ -194,14 +196,18 @@ typeorm.createConnection({
 			res.send(ans);
 		});
 	});
-	app.get(prefix + '/savePredict', async function(req, res){
-		let params = req.query;
-		let repo = connection.getRepository('predict');
-		await repo.save({
-			gameId: params.gameId,
-			result: params.result
-		});
-		res.send({status: 0, msg: 'success'});
+	app.post(prefix + '/savePredict', async function(req, res){
+		let params = req.body;
+		console.log('save predict', params);
+		if(params.status != 0) res.send({status: 1, msg: "something wrong while predict"});
+		else{
+			let repo = connection.getRepository('predict');
+			await repo.save({
+				gameId: params.gameId,
+				result: params.result
+			});
+			res.send({status: 0, msg: 'success'});
+		}
 	});
 	app.get(prefix + '/getPredict', async function(req, res){
 		let params = req.query;

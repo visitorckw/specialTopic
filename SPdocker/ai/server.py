@@ -12,17 +12,21 @@ number = 1
 executor = ThreadPoolExecutor(2)
 mutex = threading.Lock()
 def runAI(fileName, gameId):
-	url = 'http://backend:3000/api/savePredict?'
-	try:
-		obj = DeepFace.analyze(img_path = fileName, actions = ['age', 'gender'])
-		print('predict successfully')
-		print(obj)
-		requests.get(url + 'gameId=' + str(gameId) + '&result' + json.dump(obj))
-		return 'success'
-	except:
-		print('Error while detecting face')
-		requests.get(url + 'gameId=' + str(gameId) + '&result' + json.dump({'msg': 'cannot detect face'}))
-	return 'cannot detect face'
+    url = 'http://backend:3000/api/savePredict'
+    try:
+        obj = DeepFace.analyze(img_path = fileName, actions = ['age', 'gender'])
+        print('predict successfully')
+        print(obj)
+        data = {'status': 0, 'gameId': gameId, 'result': json.dumps(obj)}
+        print('post data', data)
+        requests.post(url, data=data)
+       # return 'success'
+    except:
+        print('Error while detecting face')
+        data = {'status': 1, 'msg': 'error while detecting face'}
+        print('post data', data)
+        requests.post(url, data=data)
+       # return 'cannot detect face'
 
 server = Flask(__name__)
 prefix = '/ai'
@@ -43,18 +47,18 @@ def ver():
 
 @server.route(prefix + '/predict', methods=['POST'])
 def predict():
-	global mutex, number
-	pic = request.values['picture']
-	gameId = request.values['gameId']
-	mutex.acquire()
-	filename = 'pic' + str(number) + '.jpg'
-	with open(filename, 'wb') as file:
-		jiema = base64.b64decode(pic)
-		file.write(jiema)
-	executor.submit(runAI, filename, gameId)
-	number += 1
-	mutex.release()
-	return 'submit successfully'
+    global mutex, number
+    pic = request.values['picture']
+    gameId = request.values['gameId']
+    mutex.acquire()
+    filename = 'pic' + str(number) + '.jpg'
+    with open(filename, 'wb') as file:
+        jiema = base64.b64decode(pic)
+        file.write(jiema)
+    executor.submit(runAI, filename, gameId)
+    number += 1
+    mutex.release()
+    return jsonify({'status': 0, 'msg': 'submit success'})
 
 
 if __name__ == "__main__":
