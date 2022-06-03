@@ -109,9 +109,21 @@ typeorm.createConnection({
 		console.log(game);
 		res.send({gameId: game.gameId, msg: "success"});
 	});
-	app.get(prefix + '/saveGame', function(req, res){
+	app.get(prefix + '/saveGame', async function(req, res){
 		let params = req.query;
 		let repo = connection.getRepository('user');
+		let repo2 = connection.getRepository('game');
+		let usr = await repo.findOne({uid: params.uid});
+		console.log(usr);
+		let gameRecord = await repo2.findOne({gameId: params.gameId});
+		console.log(gameRecord);
+		usr.games = usr.games + 1;
+		usr.scores = usr.scores + parseInt(params.score);
+		await repo.save(usr);
+		gameRecord.score = parseInt(params.score);
+		await repo2.save(gameRecord);
+		res.send({status: 0, msg: 'success'});
+		/*
 		repo.findOne({uid: params.uid}).then(function(usr){
 			console.log(usr);
 			let newGames = parseInt(usr.games) + 1;
@@ -134,6 +146,7 @@ typeorm.createConnection({
 			});
 			res.send({status: 0, msg: 'success'});
 		});
+		*/
 		// res.send({status: 0, msg: 'success'});
 	});
 	app.get(prefix + '/games', function(req, res){
