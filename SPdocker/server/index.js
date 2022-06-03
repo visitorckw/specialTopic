@@ -152,8 +152,15 @@ typeorm.createConnection({
 	app.get(prefix + '/games', function(req, res){
 		console.log('GET games');
 		let params = req.query;
+		console.log(params);
 		let repo = connection.getRepository('game');
-		repo.find({uid: params.uid, take: 5,}).then(function(gameData){
+		repo.find({
+			where: {uid: parseInt(params.uid)},
+			order: {
+				gameId: "DESC",
+			},
+			take: 5,
+		}).then(function(gameData){
 			console.log(gameData);
 			let ans = [];
 			for(let i = 0; i < gameData.length; i++){
@@ -179,7 +186,9 @@ typeorm.createConnection({
 		let repo = connection.getRepository('game');
 		let repo2 = connection.getRepository('user');
 		repo.find({
-			mode: params.mode,
+			where:{
+				mode: params.mode
+			},
 			order:{
 				score: "DESC"
 			},
