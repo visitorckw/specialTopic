@@ -8,6 +8,7 @@ from create_accountwindow import *
 from login_window import *
 from count import *
 from rank_window import *
+from userWindow import *
 from PyQt5.QtWidgets import  QMessageBox
 from PyQt5.QtCore import Qt
 import requests
@@ -47,6 +48,7 @@ class loginWindow(QtWidgets.QMainWindow):
 			self.login()
 
 	def login(self):
+		global account
 		account = self.ui.lineEdit.text()
 		password = self.ui.lineEdit_2.text()
 		res = requests.get('http://' + ip + '/api/login?account=' + account+'&passWord='+ password )
@@ -146,6 +148,7 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.ui.setupUi(self)
 		self.ui.pushButton.clicked.connect(self.game)
 		self.ui.pushButton_2.clicked.connect(self.advgame)
+		self.ui.pushButton_3.clicked.connect(self.user_info)
 		self.ui.pushButton_4.clicked.connect(self.rank)
 		self.ui.pushButton_5.clicked.connect(self.logout)
 
@@ -510,7 +513,18 @@ class MainWindow(QtWidgets.QMainWindow):
 		gender = dic['gender']
 		emotion = dic['emotion']
 		countwindow.update(age, gender, emotion)
-	#def user_info(self):
+		
+	def user_info(self):
+		userwindow.set_text(nickname, account)
+		res = requests.get('http://' + ip + '/api/games?uid=' + str(UID) )
+		dic = json.loads(res.text)
+		record = ['null' for i in range(5)]
+		for i in range(len(dic)) :
+			tmp = str(dic[i]['date'])
+			tmp = tmp.split('GMT')
+			record[i] = str(dic[i]['score']) + '                        ' + tmp[0]
+		userwindow.set_text_record(record[0],record[1],record[2],record[3],record[4])
+		userwindow.show()
 		
 
 	def rank(self):
@@ -589,6 +603,27 @@ class WorkerThread(QThread):
 		obj['gameId'] = gameID
 		requests.post('http://' + ip + '/ai/predict', data = obj)
 
+class userWindow(QtWidgets.QMainWindow):
+	def __init__(self, parent=None):
+		super(userWindow, self).__init__()
+		self.ui = Ui_userWindow()
+		self.ui.setupUi(self)
+		self.ui.pushButton.clicked.connect(self.forget)
+
+	def forget(self):
+		img_forget = cv2.imread('./forgetPasswordTitle.png')
+		cv2.imshow('WhyUforgetUrpasswd', img_forget)
+
+	def set_text(self, str1, str2):
+		self.ui.label_6.setText(str1)
+		self.ui.label_7.setText(str2)
+
+	def set_text_record(self, str1, str2, str3, str4, str5):
+		self.ui.label_22.setText(str1)
+		self.ui.label_23.setText(str2)
+		self.ui.label_24.setText(str3)
+		self.ui.label_25.setText(str4)
+		self.ui.label_26.setText(str5)
 
 
 if __name__ == "__main__":
@@ -598,6 +633,7 @@ if __name__ == "__main__":
 	accountWindow = create_accountWindow()
 	countwindow = countWindow()
 	rankwindow = rankWindow()
+	userwindow = userWindow()
 	window.show()
 	sys.exit(app.exec_())
 	

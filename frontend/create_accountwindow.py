@@ -67,7 +67,7 @@ class Ui_create_accountWindow(object):
 
     def retranslateUi(self, create_accountWindow):
         _translate = QtCore.QCoreApplication.translate
-        create_accountWindow.setWindowTitle(_translate("create_accountWindow", "MainWindow"))
+        create_accountWindow.setWindowTitle(_translate("create_accountWindow", "Register"))
         self.label.setText(_translate("create_accountWindow", "建立帳戶"))
         self.label_2.setText(_translate("create_accountWindow", "請輸入帳號:"))
         self.label_3.setText(_translate("create_accountWindow", "請輸入密碼:"))

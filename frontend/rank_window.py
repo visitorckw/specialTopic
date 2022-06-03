@@ -88,7 +88,7 @@ class Ui_rankWindow(object):
 
     def retranslateUi(self, rankWindow):
         _translate = QtCore.QCoreApplication.translate
-        rankWindow.setWindowTitle(_translate("rankWindow", "MainWindow"))
+        rankWindow.setWindowTitle(_translate("rankWindow", "Rank!!!"))
         self.label.setText(_translate("rankWindow", "Rank(Normal mode)"))
         self.label_1.setText(_translate("rankWindow", "1."))
         self.label_6.setText(_translate("rankWindow", "None"))
