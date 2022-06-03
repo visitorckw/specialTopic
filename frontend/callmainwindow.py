@@ -27,7 +27,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 ip = "140.116.154.65:56543"
-Time = 5    #game time
+Time = 20   #game time
 Time_interval = 2
 
 class loginWindow(QtWidgets.QMainWindow):
@@ -149,7 +149,6 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.ui.pushButton_4.clicked.connect(self.rank)
 		self.ui.pushButton_5.clicked.connect(self.logout)
 
-
 		
 	def game(self):
 		#self.close()
@@ -241,11 +240,13 @@ class MainWindow(QtWidgets.QMainWindow):
 				# Draw the pose annotation on the image.
 				image.flags.writeable = True
 				image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+				'''
 				mp_drawing.draw_landmarks(
 				image,
 				results.pose_landmarks,
 				mp_pose.POSE_CONNECTIONS,
 				landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+				'''
 				# Flip the image horizontally for a selfie-view display.
 				
 				
@@ -301,7 +302,7 @@ class MainWindow(QtWidgets.QMainWindow):
 					break
 		cap.release()
 		
-		requests.get('http://' + ip + '/api/saveGame?uid=' + str(UID) +'&score='+ str(score) + '&mode='+ 'normal')
+		requests.get('http://' + ip + '/api/saveGame?uid=' + str(UID) +'&score='+ str(score) + '&mode='+ 'normal' + '&gameId=' + str(gameID))
 		res = requests.get('http://' + ip + '/api/getPredict?gameId=' + str(gameID))
 		dic = json.loads(res.text)
 		print(dic)
@@ -313,7 +314,10 @@ class MainWindow(QtWidgets.QMainWindow):
                 
 	def advgame(self):
 		countwindow.show()
-
+		res = requests.get('http://' + ip + '/api/startGame?uid=' + str(UID) + '&mode='+ 'adv')
+		dic = json.loads(res.text)
+		global gameID
+		gameID = dic['gameId']
 		IMAGE_FILES = []
 		BG_COLOR = (192, 192, 192) # gray
 		with mp_pose.Pose(
@@ -361,6 +365,8 @@ class MainWindow(QtWidgets.QMainWindow):
 			min_tracking_confidence=0.5) as pose:
 
 			time_start = time.time()
+			time_change1 = time.time()
+			time_change2 = time.time()
 			score = 0
 			
 			Changed = 0
@@ -371,8 +377,16 @@ class MainWindow(QtWidgets.QMainWindow):
 			Y = 0
 			X2 = 0
 			Y2 = 0
+			read_img = 0
 			while cap.isOpened():
 				success, image = cap.read()
+				if read_img == 0 :
+					global img_camera
+					img_camera = image
+					work1 = WorkerThread()
+					work1.start()	
+					read_img = 1
+				
 				if not success:
 					print("Ignoring empty camera frame.")
 				# If loading a video, use 'break' instead of 'continue'.
@@ -395,11 +409,13 @@ class MainWindow(QtWidgets.QMainWindow):
 				# Draw the pose annotation on the image.
 				image.flags.writeable = True
 				image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+				'''
 				mp_drawing.draw_landmarks(
 				image,
 				results.pose_landmarks,
 				mp_pose.POSE_CONNECTIONS,
 				landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
+				'''
 				# Flip the image horizontally for a selfie-view display.
 			
 				time_end = time.time()
@@ -409,15 +425,12 @@ class MainWindow(QtWidgets.QMainWindow):
 				Width,Height,c=image.shape
 				#print(Width, Height)
 				#print(a,b,c)
-				if  (int(time_end - time_start) % Time_interval == 0  and Changed == 0) or Correct == 1:
+				if  (int(time_end - time_change1) % Time_interval == 0  and Changed == 0) or Correct == 1:
 					X = random.randint(0,Height)
 					Y = random.randint(0,Width)
-					#X2 = random.randint(0,Height)
-					#Y2 = random.randint(0,Width)
-					#center_coordinates = (X,Y) 
 					Changed = 1
 					Correct = 0
-				elif int(time_end - time_start) % Time_interval == Time_interval/2:	
+				elif int(time_end - time_change1) % Time_interval == Time_interval/2:	
 					Changed = 0
 						
 				# Radius of circle 
@@ -439,6 +452,7 @@ class MainWindow(QtWidgets.QMainWindow):
 					if ( id ==19 or id ==20 ) and coor.visibility > 0.5:
 						if  (abs(X-coor.x*Height) < 40 and abs(Y-coor.y*Width)< 40)  :                                                         
 							print(id, coor.x, coor.y, coor.visibility,X,Y)
+							time_change1 = time.time()
 							score = score + 1
 							Correct = 1
 							playsound('./correct.mp3', block=False)
@@ -446,15 +460,12 @@ class MainWindow(QtWidgets.QMainWindow):
 								image = cv2.circle(image, (X,Y), radius, (0,255,0), thickness) 
 				
 				## second  point 
-				if  (int(time_end - time_start) % Time_interval == 0  and Changed2 == 0) or Correct2 == 1:
+				if  (int(time_end - time_change2) % Time_interval == 0  and Changed2 == 0) or Correct2 == 1:
 					X2 = random.randint(0,Height)
 					Y2 = random.randint(0,Width)
-					#X2 = random.randint(0,Height)
-					#Y2 = random.randint(0,Width)
-					#center_coordinates = (X,Y) 
 					Changed2 = 1
 					Correct2 = 0
-				elif int(time_end - time_start) % Time_interval == Time_interval/2:	
+				elif int(time_end - time_change2) % Time_interval == Time_interval/2:	
 					Changed2 = 0
 						
 				# Radius of circle 
@@ -478,6 +489,7 @@ class MainWindow(QtWidgets.QMainWindow):
 							print(id, coor.x, coor.y, coor.visibility,X2,Y2)
 							score = score + 1
 							Correct2 = 1
+							time_change2 = time.time()
 							playsound('./correct.mp3', block=False)
 							for i in range (0, 5000) :
 								image = cv2.circle(image, (X2,Y2), radius, (0,255,0), thickness) 
@@ -489,7 +501,15 @@ class MainWindow(QtWidgets.QMainWindow):
 					cv2.destroyWindow('MediaPipe Pose')
 					break
 		cap.release()
-
+		requests.get('http://' + ip + '/api/saveGame?uid=' + str(UID) +'&score='+ str(score) + '&mode='+ 'adv' + '&gameId=' + str(gameID))
+		res = requests.get('http://' + ip + '/api/getPredict?gameId=' + str(gameID))
+		dic = json.loads(res.text)
+		print(dic)
+		global age, gender, emotion
+		age = str(dic['age'])
+		gender = dic['gender']
+		emotion = dic['emotion']
+		countwindow.update(age, gender, emotion)
 	#def user_info(self):
 		
 
@@ -522,7 +542,11 @@ class countWindow(QtWidgets.QMainWindow):
 		self.ui = Ui_countWindow()
 		self.ui.setupUi(self)
 		self.ui.pushButton.clicked.connect(self.confirm)
-
+	
+	def keyPressEvent(self, event):
+		if event.key() == Qt.Key_Return:
+			self.confirm()
+	
 	def labelupdate(self,Time,Score):
 		self.ui.label_3.setText(str(Time))
 		self.ui.label_4.setText(str(Score))		
