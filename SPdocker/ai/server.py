@@ -14,10 +14,16 @@ mutex = threading.Lock()
 def runAI(fileName, gameId):
     url = 'http://backend:3000/api/savePredict'
     try:
-        obj = DeepFace.analyze(img_path = fileName, actions = ['age', 'gender'])
+        obj = DeepFace.analyze(img_path = fileName, actions = ['age', 'gender', 'emotion'])
         print('predict successfully')
-        print(obj)
-        data = {'status': 0, 'gameId': gameId, 'result': json.dumps(obj)}
+        #print(obj)
+        obj2 = {
+            'age': obj['age'],
+            'gender': obj['gender'],
+            'emotion': obj['dominant_emotion']
+        }
+        print(obj2)
+        data = {'status': 0, 'gameId': gameId, 'result': json.dumps(obj2)}
         print('post data', data)
         requests.post(url, data=data)
        # return 'success'
