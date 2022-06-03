@@ -17,6 +17,8 @@ import mediapipe as mp
 import time
 import random
 import math
+import numpy as np
+import base64
 from playsound import playsound
 #import keyboard
 
@@ -25,7 +27,7 @@ mp_drawing_styles = mp.solutions.drawing_styles
 mp_pose = mp.solutions.pose
 
 ip = "140.116.154.65:56543"
-Time = 12    #game time
+Time = 5    #game time
 Time_interval = 2
 
 class loginWindow(QtWidgets.QMainWindow):
@@ -144,7 +146,6 @@ class MainWindow(QtWidgets.QMainWindow):
 		self.ui.setupUi(self)
 		self.ui.pushButton.clicked.connect(self.game)
 		self.ui.pushButton_2.clicked.connect(self.advgame)
-		#self.ui.pushButton_3.clicked.connect(self.user_info)
 		self.ui.pushButton_4.clicked.connect(self.rank)
 		self.ui.pushButton_5.clicked.connect(self.logout)
 
@@ -156,6 +157,12 @@ class MainWindow(QtWidgets.QMainWindow):
 		countwindow.show()
 		global score
 		score = 0
+		
+		res = requests.get('http://' + ip + '/api/startGame?uid=' + str(UID) + '&mode='+ 'normal')
+		dic = json.loads(res.text)
+		global gameID
+		gameID = dic['gameId']
+		
 		IMAGE_FILES = []
 		BG_COLOR = (192, 192, 192) # gray
 		with mp_pose.Pose(
@@ -203,14 +210,22 @@ class MainWindow(QtWidgets.QMainWindow):
 			min_tracking_confidence=0.5) as pose:
 			
 			time_start = time.time()
-			
+			time_change = time.time()
 			second_delay = 0
 			Changed = 0
 			Correct = 0
 			X = 0
 			Y = 0
+			read_img = 0
 			while cap.isOpened():
 				success, image = cap.read()
+				if read_img == 0 :
+					global img_camera
+					img_camera = image
+					work1 = WorkerThread()
+					work1.start()	
+					read_img = 1
+				
 				if not success:
 				  print("Ignoring empty camera frame.")
 				  # If loading a video, use 'break' instead of 'continue'.
@@ -221,15 +236,8 @@ class MainWindow(QtWidgets.QMainWindow):
 				image.flags.writeable = False
 				image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 				results = pose.process(image)
-				# print(results)
-				# print(results.pose_landmarks)
-				# print('-------------------')S
-				# print(results.pose_landmarks)
-				#if results:
 				
-				#for i in results.pose_landmarks.landmark:
-				#	print(i)
-				print('--------------')
+				#print('--------------')
 				# Draw the pose annotation on the image.
 				image.flags.writeable = True
 				image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
@@ -240,9 +248,6 @@ class MainWindow(QtWidgets.QMainWindow):
 				landmark_drawing_spec=mp_drawing_styles.get_default_pose_landmarks_style())
 				# Flip the image horizontally for a selfie-view display.
 				
-				if second_delay == 0:
-					time.sleep(2)
-					second_delay = 1
 				
 				time_end = time.time()
 				
@@ -251,13 +256,13 @@ class MainWindow(QtWidgets.QMainWindow):
 				Width,Height,c=image.shape
 				#print(Width, Height)
 				#print(a,b,c)
-				if  (int(time_end - time_start) % Time_interval == 0  and Changed == 0) or Correct == 1:
+				if  (int(time_end - time_change) % Time_interval == 0  and Changed == 0) or Correct == 1:
 					X = random.randint(0,Height)
 					Y = random.randint(0,Width)
 					center_coordinates = (X,Y) 
 					Changed = 1
 					Correct = 0
-				elif int(time_end - time_start) % Time_interval == Time_interval/2:	
+				elif int(time_end - time_change) % Time_interval == Time_interval/2:	
 				    Changed = 0
 				        
 				# Radius of circle 
@@ -283,7 +288,7 @@ class MainWindow(QtWidgets.QMainWindow):
 							score = score + 1
 							Correct = 1
 							playsound('./correct.mp3', block=False)
-							
+							time_change = time.time()
 							for i in range (0, 5000) :
 								image = cv2.circle(image, (X,Y), radius, (0,255,0), thickness) 
 				
@@ -295,10 +300,17 @@ class MainWindow(QtWidgets.QMainWindow):
 					cv2.destroyWindow('MediaPipe Pose')
 					break
 		cap.release()
+		
 		requests.get('http://' + ip + '/api/saveGame?uid=' + str(UID) +'&score='+ str(score) + '&mode='+ 'normal')
-		
-		
-    
+		res = requests.get('http://' + ip + '/api/getPredict?gameId=' + str(gameID))
+		dic = json.loads(res.text)
+		print(dic)
+		global age, gender, emotion
+		age = str(dic['age'])
+		gender = dic['gender']
+		emotion = dic['emotion']
+		countwindow.update(age, gender, emotion)
+                
 	def advgame(self):
 		countwindow.show()
 
@@ -513,7 +525,12 @@ class countWindow(QtWidgets.QMainWindow):
 
 	def labelupdate(self,Time,Score):
 		self.ui.label_3.setText(str(Time))
-		self.ui.label_4.setText(str(Score))	
+		self.ui.label_4.setText(str(Score))		
+		
+	def update(self, age, gender, emotion):
+		self.ui.label_6.setText(str(age))
+		self.ui.label_8.setText(str(gender))
+		self.ui.label_10.setText(str(emotion))	
 
 	def confirm(self):
 		self.close()
@@ -536,7 +553,17 @@ class WorkerThread(QThread):
 	def __init__(self):
 		super().__init__()
 	def run(self):
-	
+		obj = {
+			'pictrure' : '',
+			'gameId' : -1
+		}
+		_, im_arr = cv2.imencode('.jpg', img_camera)  # im_arr: image in Numpy one-dim array format.
+		im_bytes = im_arr.tobytes()
+		im_b64 = base64.b64encode(im_bytes)
+		pic = im_b64.decode('UTF-8')
+		obj['picture'] = pic
+		obj['gameId'] = gameID
+		requests.post('http://' + ip + '/ai/predict', data = obj)
 
 
 
