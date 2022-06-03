@@ -522,7 +522,7 @@ class MainWindow(QtWidgets.QMainWindow):
 			#record[i] = str(dic[i]['uid']) + str(dic[i]['gameId']) + dic[i]['date'] + str(dic[i]['score'])
 			tmp = str(dic[i]['date'])
 			tmp = tmp.split('GMT')	
-			record[i] = dic[i]['nickname'] + '   ' + str(dic[i]['score']) + '      ' + tmp[0] 
+			record[i] = dic[i]['nickname'] + '       ' + str(dic[i]['score']) + '        ' + tmp[0] 
 		rankwindow.set_text(record[0],record[1],record[2],record[3],record[4])
 		
 		rankwindow.show()
