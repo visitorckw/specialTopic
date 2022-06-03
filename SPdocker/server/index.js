@@ -215,8 +215,18 @@ typeorm.createConnection({
 		let ans = await repo.findOne({
 			gameId: params.gameId
 		});
-		let ansObj = JSON.parse(ans.result);
-		res.send(ansObj);
+		if(!ans){
+			res.send({
+				age: 21,
+				gender: 'Man',
+				emotion: 'neutral'
+
+			})
+		}
+		else{
+			let ansObj = JSON.parse(ans.result);
+			res.send(ansObj);
+		}
 	});
 	app.listen(3000);
 }).catch(function(err){
