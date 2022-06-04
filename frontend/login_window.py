@@ -69,5 +69,5 @@ class Ui_loginWindow(object):
         self.label_2.setText(_translate("loginWindow", "密碼:"))
         self.pushButton.setText(_translate("loginWindow", "建立帳戶"))
         self.pushButton_2.setText(_translate("loginWindow", "登入"))
-        self.pushButton_3.setText(_translate("loginWindow", "取消"))
+        self.pushButton_3.setText(_translate("loginWindow", "清除"))
         self.label_3.setText(_translate("loginWindow", "Welcome !!!"))
