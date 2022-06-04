@@ -123,7 +123,7 @@ class Ui_countWindow(object):
 
     def retranslateUi(self, countWindow):
         _translate = QtCore.QCoreApplication.translate
-        countWindow.setWindowTitle(_translate("countWindow", "MainWindow"))
+        countWindow.setWindowTitle(_translate("countWindow", "Total"))
         
         self.label.setText(_translate("countWindow", " time："))
         self.label_2.setText(_translate("countWindow", "score ："))
