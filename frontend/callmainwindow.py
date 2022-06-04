@@ -78,6 +78,8 @@ class loginWindow(QtWidgets.QMainWindow):
 			msg.exec_()
 
 	def creat_account(self):
+		self.ui.lineEdit.clear()
+		self.ui.lineEdit_2.clear()
 		window.hide()
 		accountWindow.show()
 		
