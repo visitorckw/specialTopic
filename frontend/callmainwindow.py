@@ -50,6 +50,7 @@ class loginWindow(QtWidgets.QMainWindow):
 	def login(self):
 		global account
 		account = self.ui.lineEdit.text()
+		global password
 		password = self.ui.lineEdit_2.text()
 		res = requests.get('http://' + ip + '/api/login?account=' + account+'&passWord='+ password )
         
@@ -523,6 +524,10 @@ class MainWindow(QtWidgets.QMainWindow):
 			tmp = str(dic[i]['date'])
 			tmp = tmp.split('GMT')
 			record[i] = str(dic[i]['score']) + '                        ' + tmp[0]
+		passwd_star = ''
+		for i in range(len(password)):
+			passwd_star += '*'
+		userwindow.set_text_passwd(passwd_star)
 		userwindow.set_text_record(record[0],record[1],record[2],record[3],record[4])
 		userwindow.show()
 		
@@ -612,11 +617,13 @@ class userWindow(QtWidgets.QMainWindow):
 
 	def forget(self):
 		img_forget = cv2.imread('./forgetPasswordTitle.png')
+		img_forget = cv2.resize(img_forget, (1024, 512), interpolation=cv2.INTER_AREA)
 		cv2.imshow('WhyUforgetUrpasswd', img_forget)
 
 	def set_text(self, str1, str2):
 		self.ui.label_6.setText(str1)
 		self.ui.label_7.setText(str2)
+		self.ui.label_8.setText
 
 	def set_text_record(self, str1, str2, str3, str4, str5):
 		self.ui.label_22.setText(str1)
@@ -624,6 +631,8 @@ class userWindow(QtWidgets.QMainWindow):
 		self.ui.label_24.setText(str3)
 		self.ui.label_25.setText(str4)
 		self.ui.label_26.setText(str5)
+	def set_text_passwd(self, str1):
+		self.ui.label_8.setText(str1)
 
 
 if __name__ == "__main__":
